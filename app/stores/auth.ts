@@ -25,17 +25,25 @@ export const useAuthStore = defineStore('auth', () => {
                 method: 'POST',
                 body: credentials
             });
-            
+
             user.value = response.user;
             isLoggedInIndicator.value = 'true';
             return response;
         } catch (error) {
             throw error;
-        }finally{
+        } finally {
             isLoading.value = false;
         }
 
 
     };
-    return { login, user , isLoading};
+    const logout = () => {
+        // Clear user state and cookie, then redirect to login page
+        user.value = null;
+        isLoggedInIndicator.value = null;
+
+        const router = useRouter();
+        router.push('/login');
+    };
+    return { login, logout, user, isLoading };
 });
