@@ -3,6 +3,11 @@
 Frontend dashboard application for browsing and managing Rick and Morty characters using the public API.  
 Built with Nuxt 3, Pinia for state management, and SCSS for styling.
 
+# Service-Oriented Modular Architecture
+
+A Modular Service-Oriented Architecture has been chosen for the separation of responsibilities and extraction of logic to specialized layers.
+It allows for scalability and reuse.
+
 ## Setup
 
 Make sure to install dependencies:
