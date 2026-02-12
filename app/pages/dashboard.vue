@@ -199,7 +199,7 @@ definePageMeta({
     to { opacity: 1; transform: translateY(0); }
 }
 
-// Media queries para adaptabilidad
+// Media query for responsiveness
 @media (max-width: 768px) {
     .dashboard-header {
         flex-direction: column;

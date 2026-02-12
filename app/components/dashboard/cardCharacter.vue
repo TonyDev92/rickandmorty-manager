@@ -1,5 +1,6 @@
 <script setup lang="ts">
-// Interface to define the structure of a character object based on the API response
+import { useFavoritesStore } from '~/stores/favoritesStore';
+
 interface Character {
     id: number;
     name: string;
@@ -13,7 +14,12 @@ interface Character {
 const props = defineProps<{
     character: Character
 }>();
-// Computed property to determine the color of the status badge based on the character's status
+
+const favStore = useFavoritesStore();
+
+// Computed property to check if the character is in favorites
+const isFav = computed(() => favStore.isFavorite(props.character.id));
+
 const statusColor = computed(() => {
     switch (props.character.status.toLowerCase()) {
         case 'alive': return '#55cc44';
@@ -21,12 +27,29 @@ const statusColor = computed(() => {
         default: return '#9e9e9e';
     }
 });
+
+// function to toggle favorite status of the character
+const toggleFav = () => {
+    favStore.toggleFavorite(props.character);
+};
 </script>
 
 <template>
     <article class="char-card">
         <div class="char-card__image-container">
             <img :src="character.image" :alt="character.name" class="char-card__img" loading="lazy" />
+            <!-- Favorite button -->
+            <button 
+                class="char-card__fav-btn" 
+                :class="{ 'char-card__fav-btn--active': isFav }"
+                @click="toggleFav"
+                aria-label="Toggle Favorite"
+            >
+                <svg viewBox="0 0 24 24" width="24" height="24" class="heart-icon">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+            </button>
+
             <span class="char-card__status-badge" :style="{ backgroundColor: statusColor }">
                 {{ character.status }}
             </span>
@@ -62,6 +85,7 @@ const statusColor = computed(() => {
     border: 1px solid rgba($color-text-muted, 0.1);
     display: flex;
     flex-direction: column;
+    position: relative;
 
     &:hover {
         transform: translateY(-8px);
@@ -73,6 +97,43 @@ const statusColor = computed(() => {
         position: relative;
         width: 100%;
         aspect-ratio: 1 / 1;
+    }
+
+    &__fav-btn {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 2;
+        background: rgba(0, 0, 0, 0.5);
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(4px);
+
+        .heart-icon {
+            fill: none;
+            stroke: white;
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        &:hover {
+            background: rgba(0, 0, 0, 0.8);
+            transform: scale(1.1);
+        }
+
+        &--active {
+            .heart-icon {
+                fill: $color-error;
+                stroke: $color-error;
+            }
+        }
     }
 
     &__img {

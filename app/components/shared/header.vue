@@ -1,23 +1,18 @@
 <script setup lang="ts">
-// Importamos el componente explícitamente si no tienes auto-import configurado
 import Logout from '~/components/ui/logout.vue';
+import { useFavoritesStore } from '~/stores/favoritesStore'; 
 
 const authStore = useAuthStore();
+const favStore = useFavoritesStore(); 
 const cookie = useCookie('is_logged_in');
 
-// Comprobamos ambos: el estado en memoria y la persistencia en cookie
+// Computed for determining if the user is authenticated based on the auth store and cookie
 const isAuthenticated = computed(() => {
     return !!authStore.user || !!cookie.value;
 });
 
-// Debug para consola: esto te dirá en tiempo real qué está pasando
-watchEffect(() => {
-    console.log("Auth Status Check:", {
-        storeUser: authStore.user,
-        cookieValue: cookie.value,
-        finalResult: isAuthenticated.value
-    });
-});
+// Computed for counting the number of favorites to display in the header
+const favoritesCount = computed(() => favStore.favorites.length);
 </script>
 
 <template>
@@ -35,9 +30,18 @@ watchEffect(() => {
                         <NuxtLink to="/" class="nav-list__link">Home</NuxtLink>
                     </li>
 
-                    <li v-if="isAuthenticated" class="nav-list__item">
-                        <NuxtLink to="/dashboard" class="nav-list__link">Dashboard</NuxtLink>
-                    </li>
+                    <template v-if="isAuthenticated">
+                        <li class="nav-list__item">
+                            <NuxtLink to="/dashboard" class="nav-list__link">Dashboard</NuxtLink>
+                        </li>
+                        
+                        <li class="nav-list__item">
+                            <NuxtLink to="/favorites" class="nav-list__link nav-list__link--favorites">
+                                Favorites
+                                <span v-if="favoritesCount > 0" class="fav-badge">{{ favoritesCount }}</span>
+                            </NuxtLink>
+                        </li>
+                    </template>
 
                     <li class="nav-list__item">
                         <NuxtLink v-if="!isAuthenticated" to="/login" class="nav-list__link nav-list__link--login">
@@ -94,6 +98,9 @@ watchEffect(() => {
         font-size: 0.9rem;
         font-weight: 600;
         transition: color 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
 
         &:hover,
         &.router-link-active {
@@ -110,6 +117,22 @@ watchEffect(() => {
                 background: rgba($color-rick-green, 0.1);
             }
         }
+
+        &--favorites {
+            position: relative;
+        }
     }
+}
+
+// Badge for favorites count in the header
+.fav-badge {
+    background: $color-rick-green;
+    color: $color-bg-dark;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: bold;
+    min-width: 18px;
+    text-align: center;
 }
 </style>
