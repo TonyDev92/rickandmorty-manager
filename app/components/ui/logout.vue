@@ -73,14 +73,4 @@ const handleLogout = () => {
     }
 }
 
-// Responsive adjustments for smaller screens
-@media (max-width: 480px) {
-    .logout-text {
-        display: none;
-    }
-    .logout-button {
-        padding: 0.6rem;
-        border-radius: 50%;
-    }
-}
 </style>

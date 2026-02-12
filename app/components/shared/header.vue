@@ -1,138 +1,209 @@
 <script setup lang="ts">
-import Logout from '~/components/ui/logout.vue';
-import { useFavoritesStore } from '~/stores/favoritesStore'; 
+import Logout from '../ui/logout.vue';
 
 const authStore = useAuthStore();
-const favStore = useFavoritesStore(); 
-const cookie = useCookie('is_logged_in');
+const isMenuOpen = ref(false);
 
-// Computed for determining if the user is authenticated based on the auth store and cookie
-const isAuthenticated = computed(() => {
-    return !!authStore.user || !!cookie.value;
-});
+const toggleMenu = () => {
+    isMenuOpen.value = !isMenuOpen.value;
+};
 
-// Computed for counting the number of favorites to display in the header
-const favoritesCount = computed(() => favStore.favorites.length);
+const closeMenu = () => {
+    isMenuOpen.value = false;
+};
+
+const handleLogout = async () => {
+    closeMenu();
+    await authStore.logout();
+};
 </script>
 
 <template>
-    <header class="main-header">
-        <div class="main-header__container">
-            <div class="main-header__branding">
-                <h1 class="main-header__title">
-                    Rick and Morty <span class="highlight">Dashboard</span>
-                </h1>
-            </div>
+    <header class="header">
+        <div class="header__container">
+            <NuxtLink to="/" class="logo" @click="closeMenu">
+                <span class="logo__rick">Rick</span>
+                <span class="logo__and">&</span>
+                <span class="logo__morty">Morty</span>
+            </NuxtLink>
 
-            <nav class="main-header__nav">
-                <ul class="nav-list">
-                    <li class="nav-list__item">
-                        <NuxtLink to="/" class="nav-list__link">Home</NuxtLink>
+            <button 
+                class="menu-toggle" 
+                :class="{ 'is-active': isMenuOpen }" 
+                @click="toggleMenu"
+                aria-label="Toggle menu"
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <nav class="nav" :class="{ 'is-open': isMenuOpen }">
+                <ul class="nav__list">
+                    <li class="nav__item">
+                        <NuxtLink to="/dashboard" class="nav__link" @click="closeMenu">Dashboard</NuxtLink>
                     </li>
-
-                    <template v-if="isAuthenticated">
-                        <li class="nav-list__item">
-                            <NuxtLink to="/dashboard" class="nav-list__link">Dashboard</NuxtLink>
-                        </li>
-                        
-                        <li class="nav-list__item">
-                            <NuxtLink to="/favorites" class="nav-list__link nav-list__link--favorites">
-                                Favorites
-                                <span v-if="favoritesCount > 0" class="fav-badge">{{ favoritesCount }}</span>
-                            </NuxtLink>
-                        </li>
-                    </template>
-
-                    <li class="nav-list__item">
-                        <NuxtLink v-if="!isAuthenticated" to="/login" class="nav-list__link nav-list__link--login">
+                    <li class="nav__item">
+                        <NuxtLink to="/favorites" class="nav__link" @click="closeMenu">Favorites</NuxtLink>
+                    </li>
+                    <li v-if="authStore.user" class="nav__item">
+                        <Logout/>
+                    </li>
+                    <li v-else class="nav__item">
+                        <NuxtLink to="/login" class="nav__link nav__link--login" @click="closeMenu">
                             Login
                         </NuxtLink>
-
-                        <Logout v-else />
                     </li>
                 </ul>
             </nav>
         </div>
+
+        <div v-if="isMenuOpen" class="nav-overlay" @click="closeMenu"></div>
     </header>
 </template>
 
 <style lang="scss" scoped>
-.main-header {
-    background: rgba($color-bg-dark, 0.9);
+.header {
+    background-color: rgba($color-bg-dark, 0.95);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba($color-rick-green, 0.2);
-    padding: 1rem 0;
     position: sticky;
     top: 0;
     z-index: 1000;
+    height: 70px;
+    display: flex;
+    align-items: center;
 
     &__container {
+        width: 100%;
         max-width: 1400px;
         margin: 0 auto;
-        padding: 0 2rem;
+        padding: 0 1.5rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
     }
+}
 
-    &__title {
-        color: white;
-        font-size: 1.2rem;
+// --- LOGO ---
+.logo {
+    text-decoration: none;
+    font-size: 1.4rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -1px;
 
-        .highlight {
-            color: $color-rick-green;
-            font-family: monospace;
-        }
+    &__rick { color: $color-rick-green; }
+    &__and { color: white; margin: 0 2px; font-size: 1rem; }
+    &__morty { color: $color-morty-blue; }
+}
+
+// --- TOGGLE MENU ---
+.menu-toggle {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 1100;
+
+    @media (min-width: 768px) { display: none; }
+
+    span {
+        width: 100%;
+        height: 3px;
+        background-color: $color-rick-green;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+    }
+
+    &.is-active {
+        span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+        span:nth-child(2) { opacity: 0; }
+        span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
     }
 }
 
-.nav-list {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-    list-style: none;
+// --- NAV NAVIGATION ---
+.nav {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    background-color: $color-bg-dark;
+    padding: 80px 2rem;
+    transition: right 0.4s cubic-bezier(0.77, 0.2, 0.05, 1.0);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+
+    &.is-open { right: 0; }
+
+    @media (min-width: 768px) {
+        position: static;
+        width: auto;
+        height: auto;
+        background: none;
+        padding: 0;
+        box-shadow: none;
+        transition: none;
+    }
+
+    &__list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+
+        @media (min-width: 768px) {
+            flex-direction: row;
+            align-items: center;
+            gap: 1.5rem;
+        }
+    }
 
     &__link {
-        color: $color-text-main;
+        color: white;
         text-decoration: none;
-        font-size: 0.9rem;
         font-weight: 600;
+        font-size: 1.2rem;
         transition: color 0.3s;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
 
-        &:hover,
-        &.router-link-active {
+        &:hover, &.router-link-active {
             color: $color-rick-green;
         }
 
-        &--login {
-            padding: 0.5rem 1.2rem;
-            border: 1px solid $color-rick-green;
-            border-radius: 4px;
-            color: $color-rick-green;
+        @media (min-width: 768px) { font-size: 0.95rem; }
+    }
 
-            &:hover {
-                background: rgba($color-rick-green, 0.1);
-            }
+    &__logout {
+        background: rgba(255, 68, 68, 0.1);
+        border: 1px solid #ff4444;
+        color: #ff4444;
+        padding: 0.5rem 1.2rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        width: 100%;
+
+        &:hover {
+            background: #ff4444;
+            color: white;
         }
 
-        &--favorites {
-            position: relative;
-        }
+        @media (min-width: 768px) { width: auto; font-size: 0.85rem; }
     }
 }
 
-// Badge for favorites count in the header
-.fav-badge {
-    background: $color-rick-green;
-    color: $color-bg-dark;
-    font-size: 0.7rem;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-weight: bold;
-    min-width: 18px;
-    text-align: center;
+.nav-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 900;
 }
 </style>
