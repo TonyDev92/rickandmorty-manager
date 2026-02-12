@@ -3,6 +3,9 @@ import Logout from '../ui/logout.vue';
 
 const authStore = useAuthStore();
 const isMenuOpen = ref(false);
+const favStore = useFavoritesStore();
+
+const favoritesCount = computed(() => favStore.favorites.length);
 
 const toggleMenu = () => {
     isMenuOpen.value = !isMenuOpen.value;
@@ -43,8 +46,15 @@ const handleLogout = async () => {
                     <li class="nav__item">
                         <NuxtLink to="/dashboard" class="nav__link" @click="closeMenu">Dashboard</NuxtLink>
                     </li>
-                    <li class="nav__item">
+                    <li class="nav__item nav__item--flex">
                         <NuxtLink to="/favorites" class="nav__link" @click="closeMenu">Favorites</NuxtLink>
+                        <span 
+                            v-if="favoritesCount > 0" 
+                            :key="favoritesCount"
+                            class="fav-badge"
+                        >
+                            {{ favoritesCount }}
+                        </span>
                     </li>
                     <li v-if="authStore.user" class="nav__item">
                         <Logout/>
@@ -85,7 +95,6 @@ const handleLogout = async () => {
     }
 }
 
-// --- LOGO ---
 .logo {
     text-decoration: none;
     font-size: 1.4rem;
@@ -98,7 +107,6 @@ const handleLogout = async () => {
     &__morty { color: $color-morty-blue; }
 }
 
-// --- TOGGLE MENU ---
 .menu-toggle {
     display: flex;
     flex-direction: column;
@@ -127,7 +135,6 @@ const handleLogout = async () => {
     }
 }
 
-// --- NAV NAVIGATION ---
 .nav {
     position: fixed;
     top: 0;
@@ -164,6 +171,14 @@ const handleLogout = async () => {
         }
     }
 
+    &__item {
+        &--flex {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+    }
+
     &__link {
         color: white;
         text-decoration: none;
@@ -176,25 +191,36 @@ const handleLogout = async () => {
         }
 
         @media (min-width: 768px) { font-size: 0.95rem; }
-    }
-
-    &__logout {
-        background: rgba(255, 68, 68, 0.1);
-        border: 1px solid #ff4444;
-        color: #ff4444;
-        padding: 0.5rem 1.2rem;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: bold;
-        width: 100%;
-
-        &:hover {
-            background: #ff4444;
-            color: white;
+        
+        &--login {
+            padding: 0.5rem 1.2rem;
+            border: 1px solid $color-rick-green;
+            border-radius: 4px;
+            color: $color-rick-green;
         }
-
-        @media (min-width: 768px) { width: auto; font-size: 0.85rem; }
     }
+}
+
+.fav-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: $color-rick-green; 
+    color: $color-bg-dark;         
+    font-size: 0.75rem;
+    font-weight: 800;
+    height: 20px;
+    min-width: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    line-height: 1;
+    animation: badge-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes badge-pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
 }
 
 .nav-overlay {
