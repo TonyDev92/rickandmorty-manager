@@ -1,32 +1,17 @@
-// Middleware for protection of routes based on authentication status
-// export default defineNuxtRouteMiddleware((to) => {
+export default defineNuxtRouteMiddleware((to, from) => {
 
-//     const isLoggedIn = useCookie('is_logged_in').value;
-//     console.log('Middleware check - isLoggedIn:', isLoggedIn, 'Navigating to:', to.path);
-
-//     if (!isLoggedIn && to.path !== '/login') {
-//         return navigateTo('/login');
-//     }
-
-//     if (isLoggedIn && to.path === '/login') {
-//         return navigateTo('/dashboard');
-//     }
-
-// });
-// middleware/auth.ts
-import { useAuthStore } from "#imports";
-
-export default defineNuxtRouteMiddleware((to) => {
+    // Middleware to protect routes and redirect based on authentication status
     const authStore = useAuthStore();
-    
-    // Si el usuario no tiene datos en el store (no está autenticado)
-    // y no está en la página de login, lo expulsamos.
-    if (!authStore.user && to.path !== '/login') {
+    const userCookie = useCookie('sessionUser');
+
+    const isAuthenticated = !!authStore.user || !!userCookie.value;
+
+    if (!isAuthenticated && to.path !== '/login') {
         return navigateTo('/login');
     }
 
-    // Si ya está autenticado e intenta ir al login, al dashboard.
-    if (authStore.user && to.path === '/login') {
+    if (isAuthenticated && to.path === '/login') {
         return navigateTo('/dashboard');
     }
 });
+

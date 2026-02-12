@@ -1,51 +1,39 @@
 import { defineStore } from 'pinia';
 
-interface User {
-    email: string;
-    role: string;
-}
-/*
-* Store for managing authentication state,
-* including user data and loading status 
-*/
-export const useAuthStore = defineStore('auth', {
-    state: () => {
-        const userCookie = useCookie<User | null>('user_data');
-        return {
-            user: userCookie.value || null,
-            isLoading: false, 
-        };
-    },
-    actions: {
-        async login(credentials: any) {
-            this.isLoading = true; 
-            try {
-                const data = await $fetch('/api/auth/login', {
-                    method: 'POST',
-                    body: credentials
-                });
-                
-                this.user = data.user;
-                const userCookie = useCookie<User | null>('sessionUser');
-                userCookie.value = data.user;
+// Auth store to manage user authentication state
+export const useAuthStore = defineStore('auth', () => {
+    const userCookie = useCookie<any>('sessionUser');
+    const user = ref(userCookie.value || null);
+    const isLoading = ref(false);
 
-                return data;
-            } catch (error) {
-                throw error;
-            } finally {
-                this.isLoading = false; 
-            }
-        },
-        async logout() {
-            this.isLoading = true;
-            try {
-                this.user = null;
-                const userCookie = useCookie<User | null>('user_data');
-                userCookie.value = null;
-                return navigateTo('/login');
-            } finally {
-                this.isLoading = false;
-            }
+    const login = async (credentials: any) => {
+        isLoading.value = true;
+        try {
+            const data = await $fetch('/api/auth/login', {
+                method: 'POST',
+                body: credentials
+            });
+            
+            user.value = data.user;
+        } catch (error) {
+            console.error("Portal access denied", error);
+            throw error;
+        } finally {
+            isLoading.value = false;
         }
-    }
+    };
+
+    const logout = async () => {
+        // In a real app, you would also call an API endpoint to clear the server-side session
+        user.value = null;
+        userCookie.value = null;
+        await navigateTo('/login');
+    };
+
+    return {
+        user,
+        isLoading,
+        login,
+        logout
+    };
 });
