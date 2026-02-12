@@ -13,7 +13,7 @@ interface Character {
 export const useFavoritesStore = defineStore('favorites', () => {
     const favorites = ref<Character[]>([]);
 
-    // 1. Cargar datos al inicializar (Solo en el cliente)
+    // Load favorites from localStorage when the store is initialized
     onMounted(() => {
         const saved = localStorage.getItem('rm_favorites');
         if (saved) {
@@ -30,7 +30,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
             favorites.value.push(character);
         }
 
-        // 2. Guardar en localStorage cada vez que cambie
+        // Save to localStorage after each change
         localStorage.setItem('rm_favorites', JSON.stringify(favorites.value));
     };
 

@@ -11,6 +11,7 @@ interface Character {
     origin: { name: string };
     
 }
+// Custom composable to manage character data fetching and state
 export const useCharacters = () => {
     const characters = ref<Character[]>([]);
     const paginationInfo = ref({ count: 0, pages: 0, next: null, prev: null });

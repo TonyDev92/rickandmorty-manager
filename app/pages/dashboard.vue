@@ -1,23 +1,22 @@
 <script setup lang="ts">
 import Header from '~/components/shared/header.vue';
-import Logout from '~/components/ui/logout.vue';
 import cardCharacter from '~/components/dashboard/cardCharacter.vue';
+import characterSearch from '~/components/dashboard/characterSearch.vue'; import { useCharacters } from '~/composables/useCharacters';
 
+const searchQuery = ref('');
 const { characters, paginationInfo, isLoading, page } = useCharacters();
 
-// Debugging logs to verify data flow in the dashboard
-console.log('Characters in Dashboard:', characters.value);
-console.log('Loading state in Dashboard:', isLoading.value);
-console.log('Current page in Dashboard:', page.value);
+/**
+ *  Property to filter characters based on the search query.
+ *  It checks if the search query is empty and returns all characters,
+ *  otherwise it filters the characters by name using a case-insensitive match.
+ */
+const filteredCharacters = computed(() => {
+    if (!searchQuery.value) return characters.value;
 
-// Watch for changes in characters to confirm updates are received
-watch(characters, (newVal) => {
-    if (newVal.length > 0) {
-        for (let i = 0; i < newVal.length; i++) {
-            console.log(`Updated Character ${i + 1}:`, newVal[i]);
-        }
-        console.log('Received updated characters:', newVal);
-    }
+    return characters.value.filter(char =>
+        char.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+    );
 });
 
 definePageMeta({
@@ -28,55 +27,57 @@ definePageMeta({
 <template>
     <div class="dashboard-layout">
         <Header />
-        
+
         <main class="dashboard-main">
             <header class="dashboard-header">
-                <div class="dashboard-header__content">
+                <div class="dashboard-header__info">
                     <h2 class="dashboard-header__title">Multiverse Monitor</h2>
                     <p class="dashboard-header__subtitle">
                         Dimension: C-137 | Showing page {{ page }} of {{ paginationInfo?.pages || '...' }}
                     </p>
                 </div>
-                
+
+                <div class="dashboard-header__actions">
+                    <characterSearch v-model="searchQuery" />
+                </div>
             </header>
 
             <section class="dashboard-content">
-                
                 <div v-if="isLoading" class="dashboard-loader">
                     <div class="portal-effect"></div>
                     <p>Scanning multiverse...</p>
                 </div>
 
-                <div v-else-if="characters.length > 0" class="character-grid">
-                    <cardCharacter
-                        v-for="char in characters" 
-                        :key="char.id" 
-                        :character="char" 
-                    />
-                </div>
+                <template v-else>
+                    <div v-if="filteredCharacters.length > 0" class="character-grid">
+                        <cardCharacter v-for="char in filteredCharacters" :key="char.id" :character="char" />
+                    </div>
 
-                <div v-else class="dashboard-empty">
-                    <p>No life forms detected in this sector.</p>
-                </div>
+                    
+                    <div v-else class="dashboard-empty">
+                        <div class="empty-icon-wrapper">
+                            <img src="https://unpkg.com/lucide-static@latest/icons/ghost.svg" alt="No results found"
+                                class="empty-icon-svg" />
+                        </div>
+                        <p class="empty-text">
+                            No life forms detected matching "<strong>{{ searchQuery }}</strong>"
+                        </p>
+                        <button @click="searchQuery = ''" class="btn-clear">
+                            Clear Search
+                        </button>
+                    </div>
+                </template>
             </section>
 
-            <footer v-if="!isLoading && characters.length > 0" class="dashboard-footer">
+            <footer v-if="!isLoading && characters.length > 0 && !searchQuery" class="dashboard-footer">
                 <nav class="pagination">
-                    <button 
-                        class="pagination__btn" 
-                        @click="page--" 
-                        :disabled="page <= 1"
-                    >
+                    <button class="pagination__btn" @click="page--" :disabled="page <= 1">
                         &larr; Previous
                     </button>
-                    
+
                     <span class="pagination__current">Page {{ page }}</span>
-                    
-                    <button 
-                        class="pagination__btn" 
-                        @click="page++" 
-                        :disabled="!paginationInfo?.next"
-                    >
+
+                    <button class="pagination__btn" @click="page++" :disabled="!paginationInfo?.next">
                         Next &rarr;
                     </button>
                 </nav>
@@ -108,10 +109,11 @@ definePageMeta({
     border-left: 6px solid $color-rick-green;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     margin-bottom: 2.5rem;
+    gap: 2rem;
 
     &__title {
         color: $color-rick-green;
-        font-size: 1.8rem;
+        font-size: 1.5rem;
         margin: 0;
         text-transform: uppercase;
         letter-spacing: 1px;
@@ -119,9 +121,17 @@ definePageMeta({
 
     &__subtitle {
         color: $color-morty-blue;
-        font-size: 0.95rem;
-        margin-top: 0.4rem;
-        font-weight: 500;
+        font-size: 0.85rem;
+        margin-top: 0.2rem;
+    }
+
+    &__actions {
+        flex: 1;
+        max-width: 400px;
+
+        :deep(.search-container) {
+            margin-bottom: 0;
+        }
     }
 }
 
@@ -141,10 +151,76 @@ definePageMeta({
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 5rem 0;
+    padding: 8rem 0;
     color: $color-rick-green;
     font-size: 1.2rem;
     gap: 1.5rem;
+
+    .portal-effect {
+        width: 80px;
+        height: 80px;
+        border: 4px dashed $color-rick-green;
+        border-radius: 50%;
+        animation: rotate 2s linear infinite;
+    }
+}
+
+.dashboard-empty {
+    text-align: center;
+    padding: 6rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.4s ease-out;
+
+    .empty-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        background: rgba($color-rick-green, 0.05);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-icon-svg {
+        width: 40px;
+        height: 40px;
+        // filter external svg to match theme colors filter
+        filter: invert(71%) sepia(85%) saturate(350%) hue-rotate(65deg) brightness(95%) contrast(85%);
+        opacity: 0.6;
+    }
+
+    .empty-text {
+        color: $color-text-muted;
+        font-size: 1.1rem;
+        max-width: 400px;
+        line-height: 1.5;
+
+        strong {
+            color: $color-rick-green;
+            font-weight: 600;
+        }
+    }
+}
+
+.btn-clear {
+    margin-top: 1.5rem;
+    background: rgba($color-rick-green, 0.1);
+    border: 1px solid $color-rick-green;
+    color: $color-rick-green;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+
+    &:hover {
+        background: $color-rick-green;
+        color: $color-bg-dark;
+    }
 }
 
 .dashboard-footer {
@@ -181,35 +257,46 @@ definePageMeta({
         &:disabled {
             opacity: 0.3;
             cursor: not-allowed;
-            border-color: $color-text-muted;
-            color: $color-text-muted;
         }
     }
 
     &__current {
         font-weight: bold;
-        color: $color-text-main;
-        min-width: 80px;
-        text-align: center;
+        color: white;
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
     }
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-// Media query for responsiveness
-@media (max-width: 768px) {
-    .dashboard-header {
-        flex-direction: column;
-        text-align: center;
-        gap: 1.5rem;
-        padding: 1.5rem;
+    from {
+        opacity: 0;
+        transform: translateY(10px);
     }
 
-    .character-grid {
-        grid-template-columns: 1fr;
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 900px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+
+        &__actions {
+            max-width: 100%;
+        }
     }
 }
 </style>

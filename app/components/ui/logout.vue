@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const authStore = useAuthStore();
 
+// Function to handle user logout, which calls the logout method from the auth store
 const handleLogout = () => {
     authStore.logout();
 };
@@ -68,11 +69,11 @@ const handleLogout = () => {
     }
 
     &:hover .logout-icon {
-        transform: rotate(90deg); // Pequeño guiño visual al girar el icono
+        transform: rotate(90deg); 
     }
 }
 
-// Ocultar texto en pantallas muy pequeñas para mantener el header limpio
+// Responsive adjustments for smaller screens
 @media (max-width: 480px) {
     .logout-text {
         display: none;
