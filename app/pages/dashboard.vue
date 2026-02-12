@@ -37,9 +37,7 @@ definePageMeta({
                         Dimension: C-137 | Showing page {{ page }} of {{ paginationInfo?.pages || '...' }}
                     </p>
                 </div>
-                <div class="dashboard-header__actions">
-                    <Logout />
-                </div>
+                
             </header>
 
             <section class="dashboard-content">
