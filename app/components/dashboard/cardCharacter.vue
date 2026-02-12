@@ -1,37 +1,6 @@
 <script setup lang="ts">
-import { useFavoritesStore } from '~/stores/favoritesStore';
-
-interface Character {
-    id: number;
-    name: string;
-    status: string;
-    species: string;
-    image: string;
-    location: { name: string };
-    origin: { name: string };
-}
-
-const props = defineProps<{
-    character: Character
-}>();
-
-const favStore = useFavoritesStore();
-
-// Computed property to check if the character is in favorites
-const isFav = computed(() => favStore.isFavorite(props.character.id));
-
-const statusColor = computed(() => {
-    switch (props.character.status.toLowerCase()) {
-        case 'alive': return '#55cc44';
-        case 'dead': return '#d63d2e';
-        default: return '#9e9e9e';
-    }
-});
-
-// function to toggle favorite status of the character
-const toggleFav = () => {
-    favStore.toggleFavorite(props.character);
-};
+const props = defineProps<{ character: any }>();
+const { isFav, statusColor, toggleFav } = useCharacterLogic(props.character);
 </script>
 
 <template>

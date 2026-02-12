@@ -10,5 +10,5 @@ definePageMeta({
 </script>
 
 <template>
-    <div>Redirigiendo...</div>
+    <div>Redirect...</div>
 </template>
