@@ -8,7 +8,7 @@ const handleLogout = () => {
 
 <template>
     <div class="logout-container">
-        <button class="logout-button" @click="handleLogout" title="Finalizar sesión">
+        <button class="logout-button" @click="handleLogout" title="Logout">
             <svg 
                 xmlns="http://www.w3.org/2000/svg" 
                 width="20" 
@@ -24,7 +24,7 @@ const handleLogout = () => {
                 <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
                 <line x1="12" y1="2" x2="12" y2="12"></line>
             </svg>
-            <span class="logout-text">Cerrar Sesión</span>
+            <span class="logout-text">Logout</span>
         </button>
     </div>
 </template>

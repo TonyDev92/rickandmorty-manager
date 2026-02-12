@@ -17,7 +17,7 @@ export const useCharacters = () => {
     const isLoading = ref(false);
     const page = ref(1);
 
-    // Function to fetch characters from the Rick and Morty API with pagination support
+    // function to fetch characters from the Rick and Morty API with pagination support
     const fetchCharacters = async () => {
         isLoading.value = true;
         try {

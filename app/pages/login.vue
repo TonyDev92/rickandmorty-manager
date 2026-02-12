@@ -9,13 +9,13 @@ const form = reactive({
     password: ''
 });
 
-// Rastreo de campos tocados para validación
+// Touch tracking for validation feedback
 const touched = reactive({
     email: false,
     password: false
 });
 
-// Lógica de validación
+// Validation computeds
 const isEmailValid = computed(() => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(form.email);
@@ -26,7 +26,7 @@ const isPasswordValid = computed(() => form.password.length > 6);
 const canSubmit = computed(() => isEmailValid.value && isPasswordValid.value);
 
 const handleLogin = async () => {
-    // Marcamos todos como tocados al intentar enviar
+    // Mark all fields as touched to trigger validation feedback
     touched.email = true;
     touched.password = true;
 
@@ -41,8 +41,8 @@ const handleLogin = async () => {
     <main class="login-view">
         <section class="login-card">
             <header class="login-card__header">
-                <h1 class="login-card__title">Portal de Acceso</h1>
-                <p class="login-card__subtitle">Ingresa tus credenciales interdimensionales</p>
+                <h1 class="login-card__title">Access Portal</h1>
+                <p class="login-card__subtitle">Enter your interdimensional credentials</p>
             </header>
 
             <form class="login-form" @submit.prevent="handleLogin" novalidate>
@@ -53,19 +53,19 @@ const handleLogin = async () => {
                         placeholder="morty.smith@citadel.com" @blur="touched.email = true" />
                     <Transition name="slide-up">
                         <span v-if="touched.email && !isEmailValid" class="login-form__feedback">
-                            Introduce un correo electrónico válido.
+                            Enter a valid email address. 
                         </span>
                     </Transition>
                 </div>
 
                 <div class="login-form__group">
-                    <label class="login-form__label" for="password">Contraseña</label>
+                    <label class="login-form__label" for="password">Password</label>
                     <input id="password" v-model="form.password" type="password" class="login-form__input"
                         :class="{ 'login-form__input--error': touched.password && !isPasswordValid }"
-                        placeholder="••••••••" @blur="touched.password = true" />
+                        :placeholder="'* '.repeat(18).trim()" @blur="touched.password = true" />
                     <Transition name="slide-up">
                         <span v-if="touched.password && !isPasswordValid" class="login-form__feedback">
-                            La contraseña debe tener más de 6 caracteres.
+                            The password must be more than 6 characters.
                         </span>
                     </Transition>
                 </div>
@@ -209,7 +209,7 @@ const handleLogin = async () => {
     }
 }
 
-// Animación de feedback
+// Feedback animation for validation messages
 .slide-up-enter-active,
 .slide-up-leave-active {
     transition: all 0.3s ease-out;
