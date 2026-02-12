@@ -29,7 +29,7 @@ const benefits = [
 <template>
     <div class="home-page">
         <Header />
-        
+
         <main class="home-content">
             <section class="hero">
                 <div class="hero__container">
@@ -37,7 +37,7 @@ const benefits = [
                         Explore the <span class="highlight">Multiverse</span>
                     </h2>
                     <p class="hero__description">
-                        The ultimate central database for Rick and Morty enthusiasts. 
+                        The ultimate central database for Rick and Morty enthusiasts.
                         Track every specimen, dimension, and bizarre reality in one place.
                     </p>
                     <div class="hero__actions">
@@ -62,11 +62,7 @@ const benefits = [
                     <div class="benefits__grid">
                         <div v-for="benefit in benefits" :key="benefit.title" class="benefit-card">
                             <div class="benefit-card__icon-wrapper">
-                                <img 
-                                    :src="benefit.icon" 
-                                    :alt="benefit.title" 
-                                    class="benefit-card__icon" 
-                                />
+                                <img :src="benefit.icon" :alt="benefit.title" class="benefit-card__icon" />
                             </div>
                             <h4 class="benefit-card__title">{{ benefit.title }}</h4>
                             <p class="benefit-card__text">{{ benefit.text }}</p>
@@ -108,7 +104,7 @@ const benefits = [
         font-size: clamp(2.5rem, 8vw, 4.5rem);
         line-height: 1.1;
         margin-bottom: 1.5rem;
-        
+
         .highlight {
             color: $color-rick-green;
             display: block;
@@ -214,7 +210,7 @@ const benefits = [
 .cta-section {
     padding: 8rem 2rem;
     text-align: center;
-    
+
     h3 {
         font-size: 2rem;
         margin-bottom: 2rem;

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const authStore = useAuthStore();
 
+// Function to handle user logout, which calls the logout method from the auth store
 const handleLogout = () => {
     authStore.logout();
 };
