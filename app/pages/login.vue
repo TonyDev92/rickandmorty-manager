@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth';
 
-
 const authStore = useAuthStore();
 const router = useRouter();
 
@@ -10,13 +9,13 @@ const form = reactive({
     password: ''
 });
 
-// Validated fields tracking
+// Rastreo de campos tocados para validación
 const touched = reactive({
     email: false,
     password: false
 });
 
-// Validation logic
+// Lógica de validación
 const isEmailValid = computed(() => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(form.email);
@@ -27,13 +26,14 @@ const isPasswordValid = computed(() => form.password.length > 6);
 const canSubmit = computed(() => isEmailValid.value && isPasswordValid.value);
 
 const handleLogin = async () => {
-    // Mark all fields as touched to trigger validation feedback
+    // Marcamos todos como tocados al intentar enviar
     touched.email = true;
     touched.password = true;
 
-    await authStore.login(form);
-    router.push('/dashboard');
-
+    if (canSubmit.value) {
+        await authStore.login(form);
+        router.push('/dashboard');
+    }
 }
 </script>
 
@@ -44,6 +44,7 @@ const handleLogin = async () => {
                 <h1 class="login-card__title">Portal de Acceso</h1>
                 <p class="login-card__subtitle">Ingresa tus credenciales interdimensionales</p>
             </header>
+
             <form class="login-form" @submit.prevent="handleLogin" novalidate>
                 <div class="login-form__group">
                     <label class="login-form__label" for="email">Email</label>
@@ -69,32 +70,39 @@ const handleLogin = async () => {
                     </Transition>
                 </div>
 
-                <button type="submit" class="login-form__button" :disabled="authStore.isLoading">
+                <button type="submit" class="login-form__button" :disabled="authStore.isLoading || !canSubmit">
                     <span v-if="!authStore.isLoading">Entrar al Portal</span>
                     <span v-else class="login-form__loader">Cargando...</span>
                 </button>
+
+                <div class="login-form__footer">
+                    <NuxtLink to="/" class="login-form__link-back">
+                        &larr; Volver a Home
+                    </NuxtLink>
+                </div>
             </form>
         </section>
     </main>
 </template>
+
 <style lang="scss" scoped>
 .login-view {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: $color-bg-dark; // Variable Global
+    background-color: $color-bg-dark;
     padding: 1rem;
 }
 
 .login-card {
-    background: $color-card-bg; // Variable Global
+    background: $color-card-bg;
     padding: 2.5rem;
     border-radius: 12px;
     width: 100%;
     max-width: 450px;
     box-shadow: 0 14px 22px rgba(0, 0, 0, 0.3);
-    border-top: 4px solid $color-rick-green; // Variable Global
+    border-top: 4px solid $color-rick-green;
 
     &__header {
         text-align: center;
@@ -121,7 +129,7 @@ const handleLogin = async () => {
     }
 
     &__label {
-        color: $color-morty-blue; // Variable Global
+        color: $color-morty-blue;
         font-weight: 600;
         margin-bottom: 0.5rem;
         font-size: 0.85rem;
@@ -144,7 +152,6 @@ const handleLogin = async () => {
 
         &--error {
             border-color: $color-error;
-
             &:focus {
                 border-color: $color-error;
                 box-shadow: 0 0 0 2px rgba($color-error, 0.2);
@@ -182,9 +189,27 @@ const handleLogin = async () => {
             filter: grayscale(0.5);
         }
     }
+
+    &__footer {
+        margin-top: 1.5rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    &__link-back {
+        color: $color-text-muted;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: color 0.3s ease;
+
+        &:hover {
+            color: $color-rick-green;
+        }
+    }
 }
 
-// Animation for validation feedback
+// Animación de feedback
 .slide-up-enter-active,
 .slide-up-leave-active {
     transition: all 0.3s ease-out;
