@@ -9,13 +9,13 @@ const form = reactive({
     password: ''
 });
 
-// Touch tracking for validation feedback
+// State to track if fields have been touched for validation feedback
 const touched = reactive({
     email: false,
     password: false
 });
 
-// Validation computeds
+// Computed properties for validation
 const isEmailValid = computed(() => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(form.email);
@@ -26,7 +26,7 @@ const isPasswordValid = computed(() => form.password.length > 6);
 const canSubmit = computed(() => isEmailValid.value && isPasswordValid.value);
 
 const handleLogin = async () => {
-    // Mark all fields as touched to trigger validation feedback
+    // Mark fields as touched to trigger validation feedback
     touched.email = true;
     touched.password = true;
 
@@ -76,7 +76,7 @@ const handleLogin = async () => {
                         type="password" 
                         class="login-form__input"
                         :class="{ 'login-form__input--error': touched.password && !isPasswordValid }"
-                        :placeholder="'* '.repeat(16).trim()"
+                        placeholder="••••••••••••" 
                         @blur="touched.password = true" 
                     />
                     <Transition name="slide-up">
@@ -99,7 +99,7 @@ const handleLogin = async () => {
 
                 <div class="login-form__footer">
                     <NuxtLink to="/" class="login-form__link-back">
-                        &larr; Return to Home
+                        &larr; Volver a Home
                     </NuxtLink>
                 </div>
             </form>
@@ -119,7 +119,7 @@ const handleLogin = async () => {
 
 .login-card {
     background: $color-card-bg;
-    padding: 1.5rem; 
+    padding: 1.5rem;
     border-radius: 12px;
     width: 100%;
     max-width: 450px;
@@ -174,7 +174,7 @@ const handleLogin = async () => {
         border: 1px solid rgba(255, 255, 255, 0.1);
         background: rgba(255, 255, 255, 0.05);
         color: $color-text-main;
-        font-size: 16px; 
+        font-size: 16px;
         transition: all 0.3s ease;
         width: 100%;
 
@@ -255,8 +255,6 @@ const handleLogin = async () => {
     }
 }
 
-// --- ANIMATIONS ---
-
 @keyframes cardAppear {
     from {
         opacity: 0;
@@ -267,7 +265,6 @@ const handleLogin = async () => {
         transform: scale(1) translateY(0);
     }
 }
-
 
 .slide-up-enter-active,
 .slide-up-leave-active {

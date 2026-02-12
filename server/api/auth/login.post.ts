@@ -1,11 +1,7 @@
-//  SERVER POST /api/auth/login
-
-//  Imports 
 import { defineEventHandler, readBody, setCookie, createError } from 'h3';
 
-// Models
 interface user {
-    username: string;
+    email: string; 
     role: string;
     iat: number;
 }
@@ -18,35 +14,43 @@ interface loginRequest {
 export default defineEventHandler(async (event) => {
     const body = await readBody<loginRequest>(event);
     const { email, password } = body;
-    console.log('Login attempt:', email , password);
+
     if (!email || !password) {
         throw createError({
             statusCode: 400,
             message: 'Email and password are required'
         });
     }
-    // JWT Simulation (base64) using credentials
-    const payload = btoa(JSON.stringify({
-        email,
+
+    const userData: user = {
+        email: email,
         role: 'user',
         iat: Date.now()
-    }));
-    const fakeToken = `fake-jwt-token.${payload}.${btoa(password).substring(0, 10)}`
+    };
 
-    // HTTP-only cookie 
+    const payload = btoa(JSON.stringify(userData));
+    const fakeToken = `fake-jwt-token.${payload}.${btoa(password).substring(0, 10)}`;
+
+    // HTTP-only cookie for authentication token
     setCookie(event, 'auth', fakeToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24, // 1 day;
+        maxAge: 60 * 60 * 24,
+    });
+
+    // Cookie session user
+    setCookie(event, 'sessionUser', JSON.stringify(userData), {
+        // No httpOnly to allow client-side access for session management
+        httpOnly: false, 
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24,
     });
 
     return {
         message: 'Login successful',
-        user:{
-            email: body.email,
-            role: 'user',
-        },
-        token: fakeToken, // For demonstration; in real apps, you wouldn't return the token in the response body.
+        user: userData,
+        token: fakeToken,
     };
 });
