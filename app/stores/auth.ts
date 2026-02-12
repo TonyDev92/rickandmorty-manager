@@ -1,11 +1,13 @@
-// stores/authStore.ts
 import { defineStore } from 'pinia';
 
 interface User {
     email: string;
     role: string;
 }
-
+/*
+* Store for managing authentication state,
+* including user data and loading status 
+*/
 export const useAuthStore = defineStore('auth', {
     state: () => {
         const userCookie = useCookie<User | null>('user_data');
